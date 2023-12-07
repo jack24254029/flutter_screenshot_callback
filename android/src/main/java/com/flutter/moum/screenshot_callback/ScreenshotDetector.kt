@@ -46,7 +46,6 @@ class ScreenshotDetector(private val context: Context,
 
     private fun queryDataColumn(uri: Uri): List<String> {
         val screenshots = mutableListOf<String>()
-
         val projection = arrayOf(
                 MediaStore.Images.Media.DATA
         )
@@ -58,7 +57,6 @@ class ScreenshotDetector(private val context: Context,
                 null
         )?.use { cursor ->
             val dataColumn = cursor.getColumnIndex(MediaStore.Images.Media.DATA)
-
             while (cursor.moveToNext()) {
                 val path = cursor.getString(dataColumn)
                 if (path.contains("screenshot", true)) {
@@ -66,13 +64,11 @@ class ScreenshotDetector(private val context: Context,
                 }
             }
         }
-
         return screenshots
     }
 
     private fun queryRelativeDataColumn(uri: Uri): List<String> {
         val screenshots = mutableListOf<String>()
-
         val projection = arrayOf(
                 MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.RELATIVE_PATH
@@ -98,7 +94,6 @@ class ScreenshotDetector(private val context: Context,
                 }
             }
         }
-
         return screenshots
     }
 

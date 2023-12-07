@@ -1,6 +1,9 @@
 package com.flutter.moum.screenshot_callback;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -13,16 +16,15 @@ import io.flutter.plugin.common.BinaryMessenger;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
 public class ScreenshotCallbackPlugin implements MethodCallHandler, FlutterPlugin {
-    private static MethodChannel channel;
     private static final String ttag = "screenshot_callback";
-
+    private static MethodChannel channel;
     private Context applicationContext;
-
     private Handler handler;
     private ScreenshotDetector detector;
     private String lastScreenshotName;
@@ -48,11 +50,16 @@ public class ScreenshotCallbackPlugin implements MethodCallHandler, FlutterPlugi
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
-
+    public void onMethodCall(MethodCall call, @NonNull Result result) {
         if (call.method.equals("initialize")) {
+            if (Build.VERSION.SDK_INT >= 33) {
+                var permissionResult = ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_MEDIA_IMAGES);
+                if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+                    result.error("permission", "permission denied", null);
+                    return;
+                }
+            }
             handler = new Handler(Looper.getMainLooper());
-
             detector = new ScreenshotDetector(applicationContext, new Function1<String, Unit>() {
                 @Override
                 public Unit invoke(String screenshotName) {
@@ -69,13 +76,11 @@ public class ScreenshotCallbackPlugin implements MethodCallHandler, FlutterPlugi
                 }
             });
             detector.start();
-
             result.success("initialize");
         } else if (call.method.equals("dispose")) {
             detector.stop();
             detector = null;
             lastScreenshotName = null;
-
             result.success("dispose");
         } else {
             result.notImplemented();

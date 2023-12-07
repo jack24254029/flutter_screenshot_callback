@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot_callback/screenshot_callback.dart';
 
 void main() => runApp(MyApp());
@@ -26,8 +29,14 @@ class _MyAppState extends State<MyApp> {
 
   //It must be created after permission is granted.
   Future<void> initScreenshotCallback() async {
-    screenshotCallback = ScreenshotCallback();
-
+    if (Platform.isAndroid) {
+      await Permission.photos
+          .onGrantedCallback(() => screenshotCallback = ScreenshotCallback())
+          .onPermanentlyDeniedCallback(() => openAppSettings())
+          .request();
+    } else if (Platform.isIOS) {
+      screenshotCallback = ScreenshotCallback();
+    }
     screenshotCallback.addListener(() {
       setState(() {
         text = "Screenshot callback Fired!";

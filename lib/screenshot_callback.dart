@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class ScreenshotCallback {
-  static const MethodChannel _channel =
-      const MethodChannel('flutter.moum/screenshot_callback');
+  static const MethodChannel _channel = const MethodChannel('flutter.moum/screenshot_callback');
 
   /// Functions to execute when callback fired.
   List<VoidCallback> onCallbacks = <VoidCallback>[];
