@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.6.10'
+    ext.kotlin_version = '1.8.21'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath 'com.android.tools.build:gradle:8.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -21,6 +21,16 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+    // Ref: https://github.com/flutter/flutter/issues/125181#issuecomment-1554429210
+    afterEvaluate {
+        // check if `android` block is available and namespace isn't set
+        if(it.hasProperty('android') && it.android.namespace == null){
+            def manifest = new XmlSlurper().parse(file(it.android.sourceSets.main.manifest.srcFile))
+            def packageName = manifest.@package.text()
+            print("Setting ${packageName} as android namespace")
+            android.namespace= packageName
+        }
+    }
 }
 subprojects {
     project.evaluationDependsOn(':app')
